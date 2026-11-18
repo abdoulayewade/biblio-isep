@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Gestion des emprunts</h2>
+            <h2 class="text-2xl font-bold tracking-tight text-gray-900">Gestion des emprunts</h2>
             <a href="{{ route('admin.emprunts.create') }}">
                 <x-primary-button type="button">+ Nouvel emprunt</x-primary-button>
             </a>
@@ -31,7 +31,7 @@
                 <x-primary-button>Rechercher</x-primary-button>
             </form>
 
-            <div class="overflow-x-auto rounded-lg bg-white shadow-sm">
+            <div class="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                         <tr>

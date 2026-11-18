@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Modifier « {{ $livre->titre }} »</h2>
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Modifier « {{ $livre->titre }} »</h2>
     </x-slot>
 
     <div class="py-8">
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-lg bg-white p-6 shadow-sm">
+            <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
                 <form method="POST" action="{{ route('admin.livres.update', $livre) }}">
                     @csrf
                     @method('PUT')

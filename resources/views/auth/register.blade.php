@@ -1,4 +1,12 @@
 <x-guest-layout>
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Créer un compte</h2>
+        <p class="mt-1 text-sm text-gray-500">
+            Déjà inscrit ?
+            <a href="{{ route('login') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">Connectez-vous</a>
+        </p>
+    </div>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

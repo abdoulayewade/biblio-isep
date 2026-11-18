@@ -1,4 +1,12 @@
 <x-guest-layout>
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Connexion</h2>
+        <p class="mt-1 text-sm text-gray-500">
+            Pas encore de compte ?
+            <a href="{{ route('register') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">Inscrivez-vous</a>
+        </p>
+    </div>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
