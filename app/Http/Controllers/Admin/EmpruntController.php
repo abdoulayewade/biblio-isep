@@ -6,10 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Emprunt;
 use App\Models\Livre;
 use App\Models\User;
+use App\Services\EmpruntService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EmpruntController extends Controller
@@ -55,47 +54,15 @@ class EmpruntController extends Controller
     /**
      * Enregistre un emprunt en appliquant les règles métier.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, EmpruntService $service): RedirectResponse
     {
         $donnees = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
             'livre_id' => ['required', 'exists:livres,id'],
         ]);
 
-        // Transaction + verrou : si deux admins prêtent le dernier exemplaire au même moment,
-        // le second attend que le premier ait fini, puis voit le stock à jour.
-        DB::transaction(function () use ($donnees) {
-            $lecteur = User::findOrFail($donnees['user_id']);
-            $livre = Livre::lockForUpdate()->findOrFail($donnees['livre_id']);
-
-            // Règle 1 : le livre doit être disponible
-            if ($livre->disponible <= 0) {
-                throw ValidationException::withMessages([
-                    'livre_id' => "« {$livre->titre} » n'est plus disponible (tous les exemplaires sont prêtés).",
-                ]);
-            }
-
-            // Règle 2 : maximum MAX_EN_COURS emprunts en cours par lecteur
-            if ($lecteur->empruntsEnCours()->count() >= Emprunt::MAX_EN_COURS) {
-                throw ValidationException::withMessages([
-                    'user_id' => "{$lecteur->name} a déjà ".Emprunt::MAX_EN_COURS.' emprunts en cours (maximum atteint).',
-                ]);
-            }
-
-            // Règle 3 : pas deux fois le même livre en même temps
-            if ($lecteur->empruntsEnCours()->where('livre_id', $livre->id)->exists()) {
-                throw ValidationException::withMessages([
-                    'livre_id' => "{$lecteur->name} a déjà ce livre en cours d'emprunt.",
-                ]);
-            }
-
-            Emprunt::create([
-                'user_id' => $lecteur->id,
-                'livre_id' => $livre->id,
-                'date_emprunt' => today(),
-                'date_retour_prevue' => today()->addDays(Emprunt::DUREE_JOURS),
-            ]);
-        });
+        // Les règles métier (stock, max 3, doublon) sont dans App\Services\EmpruntService
+        $service->emprunter($donnees['user_id'], $donnees['livre_id']);
 
         return redirect()->route('admin.emprunts.index')->with('success', 'Emprunt enregistré. Retour prévu dans '.Emprunt::DUREE_JOURS.' jours.');
     }

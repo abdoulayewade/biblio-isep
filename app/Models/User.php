@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    // HasApiTokens : jetons d'accès pour l'API (Laravel Sanctum)
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * 'role' n'est volontairement PAS dans $fillable :

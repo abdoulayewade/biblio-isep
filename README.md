@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# biblio-isep
-=======
 # 📚 BiblioISEP — Gestion de bibliothèque
 
 Application web de gestion d'une bibliothèque : catalogue de livres, catégories, emprunts et retours, suivi des retards.
@@ -189,4 +186,84 @@ Sous PostgreSQL, `LIKE` est sensible à la casse : « clean » ne trouverait pas
 
 **« Qu'est-ce que le problème N+1 ? »**
 Afficher 10 livres puis faire une requête par livre pour compter ses emprunts = 11 requêtes. Avec `withCount('empruntsEnCours')` et `with('category')`, on ne fait que 3 requêtes au total.
->>>>>>> dc9b535 (bibilio-isep)
+
+---
+
+## 5. Web services (API REST)
+
+L'application expose une API JSON sous le préfixe **`/api`**, sécurisée par **jetons Laravel Sanctum**.
+Elle réutilise exactement les mêmes modèles et règles métier que l'interface web
+(`App\Services\EmpruntService` est partagé par les deux).
+
+> Après installation : `php artisan migrate` (crée la table `personal_access_tokens`).
+
+### Authentification
+
+1. `POST /api/login` avec `{"email": "...", "password": "..."}` → la réponse contient un `token`
+2. Envoyer ce jeton dans chaque requête : `Authorization: Bearer <token>`
+3. `POST /api/logout` révoque le jeton
+
+Toutes les erreurs sont en JSON : `401` (pas de jeton), `403` (pas admin), `404`, `409` (conflit métier :
+suppression impossible, livre déjà rendu), `422` (validation ou règle d'emprunt non respectée).
+
+### Endpoints
+
+| Méthode | URL | Accès | Description |
+|---|---|---|---|
+| POST | `/api/register` | public | Inscription (toujours **lecteur**) → jeton |
+| POST | `/api/login` | public | Connexion → jeton (6 essais / minute) |
+| POST | `/api/logout` | connecté | Révoque le jeton courant |
+| GET | `/api/me` | connecté | Utilisateur connecté |
+| GET | `/api/dashboard` | connecté | Statistiques (globales si admin, personnelles sinon) |
+| GET | `/api/livres` | connecté | Catalogue paginé — `?q=`, `?categorie=`, `?disponible=1`, `?per_page=` |
+| GET | `/api/livres/{id}` | connecté | Détail d'un livre (avec stock disponible) |
+| GET | `/api/categories` | connecté | Liste des catégories (avec nombre de livres) |
+| GET | `/api/categories/{id}` | connecté | Détail d'une catégorie |
+| GET | `/api/mes-emprunts` | connecté | Mes emprunts — `?statut=en_cours\|en_retard\|rendus` |
+| POST | `/api/admin/categories` | admin | Créer une catégorie `{nom}` |
+| PUT/PATCH | `/api/admin/categories/{id}` | admin | Modifier une catégorie |
+| DELETE | `/api/admin/categories/{id}` | admin | Supprimer (409 si elle contient des livres) |
+| POST | `/api/admin/livres` | admin | Créer un livre `{titre, auteur, isbn, quantite, category_id}` |
+| PUT/PATCH | `/api/admin/livres/{id}` | admin | Modifier (PATCH = champs partiels) |
+| DELETE | `/api/admin/livres/{id}` | admin | Supprimer (409 s'il a un historique) |
+| GET | `/api/admin/lecteurs` | admin | Lecteurs paginés — `?q=` |
+| POST | `/api/admin/lecteurs` | admin | Inscrire un lecteur `{name, email, password, password_confirmation}` |
+| GET | `/api/admin/lecteurs/{id}` | admin | Fiche lecteur + historique d'emprunts |
+| GET | `/api/admin/emprunts` | admin | Emprunts — `?statut=`, `?q=`, `?user_id=` |
+| POST | `/api/admin/emprunts` | admin | Nouvel emprunt `{user_id, livre_id}` (règles métier → 422) |
+| GET | `/api/admin/emprunts/{id}` | admin | Détail d'un emprunt |
+| PATCH | `/api/admin/emprunts/{id}/retour` | admin | Enregistrer le retour |
+
+### Tester avec Postman
+
+Une collection prête à l'emploi est fournie : **`postman/BiblioISEP.postman_collection.json`** (34 requêtes).
+
+1. Lancer le serveur : `php artisan serve` (adapter la variable `base_url` si le port n'est pas `8080`)
+2. Postman › **Import** › choisir le fichier
+3. Cliquer sur la collection › onglet **Variables** › renseigner `admin_email` et `admin_password` › **Save**
+4. Exécuter **1. Authentification › Connexion (admin)** : le jeton est enregistré automatiquement
+5. Lancer les autres requêtes une par une, ou tout d'un coup : clic droit › **Run collection**
+
+Les requêtes « Créer » mémorisent les identifiants créés (catégorie, livre, lecteur, emprunt) pour les
+requêtes suivantes. Chaque requête vérifie son code de retour (onglet *Test Results*), y compris les cas
+d'erreur volontaires : 401 sans jeton, 403 pour un lecteur sur une route admin, 422 pour un emprunt en double,
+409 pour une suppression interdite.
+
+### Exemple (curl)
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/login -H "Accept: application/json" -d "email=admin@isep.sn" -d "password=motdepasse"
+curl http://127.0.0.1:8000/api/livres?q=clean -H "Authorization: Bearer 1|xxxxxxxx"
+```
+
+### Où est le code ?
+
+```
+routes/api.php                         → toutes les routes de l'API
+app/Http/Controllers/Api/              → contrôleurs JSON (Auth, Livre, Category, Emprunt, Lecteur, ...)
+app/Http/Resources/                    → format JSON renvoyé (LivreResource, EmpruntResource, ...)
+app/Services/EmpruntService.php        → règles métier d'emprunt (partagées web + API)
+bootstrap/app.php                      → erreurs en JSON sur /api/*
+tests/Feature/ApiTest.php              → tests de l'API
+postman/                               → collection Postman pour tester l'API à la main
+```
