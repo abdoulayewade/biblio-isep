@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Mes emprunts</h2>
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Mes emprunts</h2>
     </x-slot>
 
     <div class="py-8">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="overflow-x-auto rounded-lg bg-white shadow-sm">
+            <div class="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                         <tr>

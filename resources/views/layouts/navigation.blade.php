@@ -1,18 +1,26 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+@php
+    // Initiales pour l'avatar : "Doulo Thioune" => "DT"
+    $initiales = collect(explode(' ', Auth::user()->name))->filter()->take(2)
+        ->map(fn ($mot) => mb_strtoupper(mb_substr($mot, 0, 1)))->implode('');
+@endphp
+
+<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <x-application-logo class="block h-8 w-auto text-indigo-600" />
-                        <span class="text-lg font-bold text-gray-800">BiblioISEP</span>
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
+                            <x-application-logo class="h-5 w-5 text-white" />
+                        </span>
+                        <span class="text-lg font-bold tracking-tight text-gray-900">Biblio<span class="text-indigo-600">ISEP</span></span>
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden items-center gap-1 sm:ms-8 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
@@ -41,14 +49,15 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }} @if (Auth::user()->isAdmin())<span class="ms-1 rounded bg-indigo-100 px-1.5 py-0.5 text-xs font-semibold text-indigo-700">Admin</span>@endif</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                        <button class="inline-flex items-center gap-2.5 rounded-full py-1 pe-2 ps-1 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus:outline-none">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">{{ $initiales }}</span>
+                            <span class="text-start leading-tight">
+                                <span class="block">{{ Auth::user()->name }}</span>
+                                <span class="block text-xs font-normal text-gray-500">{{ Auth::user()->isAdmin() ? 'Administrateur' : 'Lecteur' }}</span>
+                            </span>
+                            <svg class="h-4 w-4 fill-current text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
                         </button>
                     </x-slot>
 
@@ -111,9 +120,12 @@
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+            <div class="flex items-center gap-3 px-4">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">{{ $initiales }}</span>
+                <div>
+                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                </div>
             </div>
 
             <div class="mt-3 space-y-1">

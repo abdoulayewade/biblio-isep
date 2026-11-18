@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Catégories</h2>
+            <h2 class="text-2xl font-bold tracking-tight text-gray-900">Catégories</h2>
             <a href="{{ route('admin.categories.create') }}">
                 <x-primary-button type="button">+ Nouvelle catégorie</x-primary-button>
             </a>
@@ -12,7 +12,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <x-flash />
 
-            <div class="overflow-x-auto rounded-lg bg-white shadow-sm">
+            <div class="overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                         <tr>
@@ -31,13 +31,13 @@
                                     </a>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
-                                    <a href="{{ route('admin.categories.edit', $category) }}" class="text-indigo-600 hover:underline">Modifier</a>
-                                    <span class="text-gray-300">|</span>
+                                    <a href="{{ route('admin.categories.edit', $category) }}"
+                                       class="rounded-md px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50">Modifier</a>
                                     <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="inline"
                                           onsubmit="return confirm('Supprimer cette catégorie ?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="text-red-600 hover:underline">Supprimer</button>
+                                        <button class="rounded-md px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">Supprimer</button>
                                     </form>
                                 </td>
                             </tr>
